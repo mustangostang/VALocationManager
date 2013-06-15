@@ -23,12 +23,14 @@
 
 + (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
                           update: (void(^)(CLLocation* location)) update
+                         success: (void(^)(CLLocation* location)) success
                          failure: (void(^)(NSError* error)) failure
-                         finally: (void(^)(CLLocation* location)) finally
+                         finally: (void(^)()) finally
 {
     VALocationManager *manager = [[VALocationManager alloc] init];
     manager.locationManager.desiredAccuracy = accuracy;
     manager.updateBlock = (update);
+    manager.successBlock = (success);
     manager.failureBlock = (failure);
     manager.finallyBlock = (finally);
     [manager.locationManager startUpdatingLocation];
@@ -38,30 +40,51 @@
 + (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
                           update: (void(^)(CLLocation* location)) update
 {
-    [self getLocationWithAccuracy: accuracy update: update failure: nil finally: nil];
+    [self getLocationWithAccuracy: accuracy update: update success: nil failure: nil finally: nil];
 }
 
++ (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
+                         success: (void(^)(CLLocation* location)) success
+{
+    [self getLocationWithAccuracy: accuracy update: nil success: success failure: nil finally: nil];
+}
+
++ (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
+                         success: (void(^)(CLLocation* location)) success
+                         failure: (void(^)(NSError* error)) failure
+{
+    [self getLocationWithAccuracy: accuracy update: nil success: success failure: failure finally: nil];
+}
 
 + (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
                           update: (void(^)(CLLocation* location)) update
                          failure: (void(^)(NSError* error)) failure
 {
-    [self getLocationWithAccuracy: accuracy
-                           update: update
-                          failure: failure
-                          finally: nil];
+    [self getLocationWithAccuracy: accuracy update: update success: nil failure: failure finally: nil];
 }
 
 + (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
                          failure: (void(^)(NSError* error)) failure
                          finally: (void(^)(CLLocation* location)) finally
 {
-    [self getLocationWithAccuracy: accuracy
-                           update: nil
-                          failure: failure
-                          finally: finally];
+    [self getLocationWithAccuracy: accuracy update: nil success: nil failure: failure finally: finally];
 }
 
++ (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
+                          update: (void(^)(CLLocation* location)) update
+                         success: (void(^)(CLLocation* location)) success
+                         failure: (void(^)(NSError* error)) failure
+{
+    [self getLocationWithAccuracy: accuracy update: update success: success failure: failure finally: nil];
+}
+
++ (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
+                         success: (void(^)(CLLocation* location)) success
+                         failure: (void(^)(NSError* error)) failure
+                         finally: (void(^)()) finally
+{
+    [self getLocationWithAccuracy: accuracy update: nil success: success failure: failure finally: finally];
+}
 
 
 - (VALocationManager *) init
@@ -84,18 +107,18 @@
     self.bestEffortAtLocation = newLocation;
     if (self.updateBlock != nil) { self.updateBlock(newLocation); }
     if (newLocation.horizontalAccuracy <= self.locationManager.desiredAccuracy) {
-        if (self.finallyBlock != nil) { self.finallyBlock(newLocation); }
+        if (self.successBlock != nil) { self.successBlock(newLocation); }
+        if (self.finallyBlock != nil) { self.finallyBlock(); }
         [self stopUpdatingLocation];
         [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(stopUpdatingLocation) object:nil];
     }
 }
 
 - (void)locationManager:(CLLocationManager *)manager didFailWithError:(NSError *)error {
-    if ([error code] != kCLErrorLocationUnknown) {
-        [self stopUpdatingLocation];
-    }
+    NSLog (@"VALocationManager failed with error: %@", error);
     if (self.failureBlock != nil) { self.failureBlock(error); }
-    if (self.finallyBlock != nil) { self.finallyBlock(nil); }
+    if (self.finallyBlock != nil) { self.finallyBlock(); }
+    [self stopUpdatingLocation];
 }
 
 - (void)stopUpdatingLocation {
@@ -107,7 +130,7 @@
     [self stopUpdatingLocation];
     NSError *error = [NSError errorWithDomain:@"com.CLLocationmanager" code:1 userInfo: @{ NSLocalizedDescriptionKey: @"CLLocationManager timed out"}];
     if (self.failureBlock != nil) { self.failureBlock(error); }
-    if (self.finallyBlock != nil) { self.finallyBlock(nil); }
+    if (self.finallyBlock != nil) { self.finallyBlock(); }
 
 }
 
