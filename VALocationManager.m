@@ -24,7 +24,7 @@
 + (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
                           update: (void(^)(CLLocation* location)) update
                          failure: (void(^)(NSError* error)) failure
-                         finally: (void(^)(CLLocation* location, NSString* state)) finally
+                         finally: (void(^)(CLLocation* location)) finally
 {
     VALocationManager *manager = [[VALocationManager alloc] init];
     manager.locationManager.desiredAccuracy = accuracy;
@@ -54,7 +54,7 @@
 
 + (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
                          failure: (void(^)(NSError* error)) failure
-                         finally: (void(^)(CLLocation* location, NSString* state)) finally
+                         finally: (void(^)(CLLocation* location)) finally
 {
     [self getLocationWithAccuracy: accuracy
                            update: nil
@@ -84,7 +84,7 @@
     self.bestEffortAtLocation = newLocation;
     if (self.updateBlock != nil) { self.updateBlock(newLocation); }
     if (newLocation.horizontalAccuracy <= self.locationManager.desiredAccuracy) {
-        if (self.finallyBlock != nil) { self.finallyBlock(newLocation, @"Success"); }
+        if (self.finallyBlock != nil) { self.finallyBlock(newLocation); }
         [self stopUpdatingLocation];
         [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(stopUpdatingLocation) object:nil];
     }
@@ -95,7 +95,7 @@
         [self stopUpdatingLocation];
     }
     if (self.failureBlock != nil) { self.failureBlock(error); }
-    if (self.finallyBlock != nil) { self.finallyBlock(nil, @"Error"); }
+    if (self.finallyBlock != nil) { self.finallyBlock(nil); }
 }
 
 - (void)stopUpdatingLocation {
@@ -107,7 +107,7 @@
     [self stopUpdatingLocation];
     NSError *error = [NSError errorWithDomain:@"com.CLLocationmanager" code:1 userInfo: @{ NSLocalizedDescriptionKey: @"CLLocationManager timed out"}];
     if (self.failureBlock != nil) { self.failureBlock(error); }
-    if (self.finallyBlock != nil) { self.finallyBlock(nil, @"Timed out"); }
+    if (self.finallyBlock != nil) { self.finallyBlock(nil); }
 
 }
 

@@ -14,7 +14,7 @@
 
 @property (nonatomic, copy) void (^updateBlock) (CLLocation* location);
 @property (nonatomic, copy) void (^failureBlock) (NSError *error);
-@property (nonatomic, copy) void (^finallyBlock) (CLLocation* location, NSString *state);
+@property (nonatomic, copy) void (^finallyBlock) (CLLocation* location);
 
 
 + (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
@@ -28,11 +28,11 @@
 + (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
                           update: (void(^)(CLLocation* location)) update
                          failure: (void(^)(NSError* error)) failure
-                         finally: (void(^)(CLLocation* location, NSString* state)) finally;
+                         finally: (void(^)(CLLocation* location)) finally;
 
 + (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
                          failure: (void(^)(NSError* error)) failure
-                         finally: (void(^)(CLLocation* location, NSString* state)) finally;
+                         finally: (void(^)(CLLocation* location)) finally;
 
 
 @end
