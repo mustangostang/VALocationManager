@@ -20,6 +20,14 @@
 
 @implementation VALocationManager
 
+@synthesize updateBlock = _updateBlock;
+@synthesize successBlock = _successBlock;
+@synthesize failureBlock = _failureBlock;
+@synthesize finallyBlock = _finallyBlock;
+
+@synthesize locationManager = _locationManager;
+@synthesize locationMeasurements = _locationMeasurements;
+@synthesize bestEffortAtLocation = _bestEffortAtLocation;
 
 + (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
                           update: (void(^)(CLLocation* location)) update
