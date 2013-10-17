@@ -89,10 +89,13 @@
 
 - (VALocationManager *) init
 {
-    self.locationManager = [[CLLocationManager alloc] init];
-    self.locationManager.delegate = self;
-    self.locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
-    self.bestEffortAtLocation = nil;
+	if ((self = [super init]))
+	{
+		self.locationManager = [[CLLocationManager alloc] init];
+		self.locationManager.delegate = self;
+		self.locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
+		self.bestEffortAtLocation = nil;
+	}
     return self;
 }
 
