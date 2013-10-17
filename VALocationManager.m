@@ -35,14 +35,16 @@
                          failure: (void(^)(NSError* error)) failure
                          finally: (void(^)()) finally
 {
-    VALocationManager *manager = [[VALocationManager alloc] init];
-    manager.locationManager.desiredAccuracy = accuracy;
-    manager.updateBlock = (update);
-    manager.successBlock = (success);
-    manager.failureBlock = (failure);
-    manager.finallyBlock = (finally);
-    [manager.locationManager startUpdatingLocation];
-    [manager performSelector:@selector(stopUpdatingLocation) withObject:nil afterDelay: VA_LOCATION_MANAGER_TIMEOUT];
+	dispatch_async(dispatch_get_main_queue(), ^ {
+		VALocationManager *manager = [[VALocationManager alloc] init];
+		manager.locationManager.desiredAccuracy = accuracy;
+		manager.updateBlock = (update);
+		manager.successBlock = (success);
+		manager.failureBlock = (failure);
+		manager.finallyBlock = (finally);
+		[manager.locationManager startUpdatingLocation];
+		[manager performSelector:@selector(stopUpdatingLocation) withObject:nil afterDelay: VA_LOCATION_MANAGER_TIMEOUT];
+	});
 }
 
 + (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
