@@ -20,6 +20,14 @@
 
 @implementation VALocationManager
 
+@synthesize updateBlock = _updateBlock;
+@synthesize successBlock = _successBlock;
+@synthesize failureBlock = _failureBlock;
+@synthesize finallyBlock = _finallyBlock;
+
+@synthesize locationManager = _locationManager;
+@synthesize locationMeasurements = _locationMeasurements;
+@synthesize bestEffortAtLocation = _bestEffortAtLocation;
 
 + (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
                           update: (void(^)(CLLocation* location)) update
@@ -27,14 +35,16 @@
                          failure: (void(^)(NSError* error)) failure
                          finally: (void(^)()) finally
 {
-    VALocationManager *manager = [[VALocationManager alloc] init];
-    manager.locationManager.desiredAccuracy = accuracy;
-    manager.updateBlock = (update);
-    manager.successBlock = (success);
-    manager.failureBlock = (failure);
-    manager.finallyBlock = (finally);
-    [manager.locationManager startUpdatingLocation];
-    [manager performSelector:@selector(stopUpdatingLocation) withObject:nil afterDelay: VA_LOCATION_MANAGER_TIMEOUT];
+	dispatch_async(dispatch_get_main_queue(), ^ {
+		VALocationManager *manager = [[VALocationManager alloc] init];
+		manager.locationManager.desiredAccuracy = accuracy;
+		manager.updateBlock = (update);
+		manager.successBlock = (success);
+		manager.failureBlock = (failure);
+		manager.finallyBlock = (finally);
+		[manager.locationManager startUpdatingLocation];
+		[manager performSelector:@selector(stopUpdatingLocation) withObject:nil afterDelay: VA_LOCATION_MANAGER_TIMEOUT];
+	});
 }
 
 + (void) getLocationWithAccuracy: (CLLocationAccuracy) accuracy
@@ -89,10 +99,13 @@
 
 - (VALocationManager *) init
 {
-    self.locationManager = [[CLLocationManager alloc] init];
-    self.locationManager.delegate = self;
-    self.locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
-    self.bestEffortAtLocation = nil;
+	if ((self = [super init]))
+	{
+		self.locationManager = [[CLLocationManager alloc] init];
+		self.locationManager.delegate = self;
+		self.locationManager.desiredAccuracy = kCLLocationAccuracyHundredMeters;
+		self.bestEffortAtLocation = nil;
+	}
     return self;
 }
 
